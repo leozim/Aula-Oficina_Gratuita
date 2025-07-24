@@ -15,14 +15,10 @@ CREATE DATABASE "AULA_OFICINA_GRATUITA"
 -- PROJETO: Aplicativo de Intermediação de Aulas e Oficinas Gratuitas
 -- =================================================================================
 
--- Deletar tabelas existentes para garantir uma nova criação limpa
-DROP TABLE IF EXISTS MENSAGEM_PRIVADA, 
-						MENSAGEM, NOTIFICACAO, 
-						FREQUENCIA, CERTIFICADO, 
-						AVALIACAO, INSCRICAO, 
-						AULA_OFICINA_material_apoio, AULA_OFICINA_publico_alvo, 
-						AULA_OFICINA, CATEGORIA, ALUNO_areas_interesse, 
-						ADMINISTRADOR, INSTRUTOR, ALUNO, USUARIO CASCADE;
+-- SCRIPT DE LIMPEZA
+DROP TABLE IF EXISTS MENSAGEM_PRIVADA, MENSAGEM, NOTIFICACAO, FREQUENCIA, CERTIFICADO, AVALIACAO, INSCRICAO, AULA_OFICINA_material_apoio, AULA_OFICINA_publico_alvo, AULA_OFICINA, CATEGORIA, ALUNO_areas_interesse, ADMINISTRADOR, INSTRUTOR, ALUNO, USUARIO CASCADE;
+DROP TYPE IF EXISTS status_aula_enum, status_inscricao_enum;
+COMMIT;
 
 -- Definição de tipos ENUM para padronizar valores de status
 CREATE TYPE status_aula_enum AS ENUM ('Rascunho', 'Publicada', 'Em Andamento', 'Concluída', 'Cancelada');
@@ -225,5 +221,4 @@ ALTER TABLE AULA_OFICINA
 ALTER COLUMN data_hora_inicio TYPE TIMESTAMP WITHOUT TIME ZONE,
 ALTER COLUMN data_hora_fim TYPE TIMESTAMP WITHOUT TIME ZONE;
 
--- Este comando garante que a mudança seja aplicada imediatamente.
 COMMIT;
