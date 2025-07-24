@@ -41,7 +41,6 @@ def create_categoria_view():
         tabela_categorias.selection = []  # Limpa a seleção na tabela
 
     def inserir_action(event):
-        # ... (código interno sem alterações)
         log.info(f"Ação: inserir_action (Categoria) com nome='{nome_categoria.value}'")
         if not nome_categoria.value:
             pn.state.notifications.warning('O nome da categoria é obrigatório.')
@@ -60,7 +59,6 @@ def create_categoria_view():
             pn.state.notifications.error('Erro ao inserir. Verifique o console.')
 
     def atualizar_action(event):
-        # ... (código interno sem alterações)
         log.info(f"Ação: atualizar_action (Categoria) para ID={id_categoria.value}")
         if not id_categoria.value:
             pn.state.notifications.warning('Selecione uma categoria para atualizar.')
@@ -79,7 +77,6 @@ def create_categoria_view():
             pn.state.notifications.error('Erro ao atualizar. Verifique o console.')
 
     def excluir_action(event):
-        # ... (código interno sem alterações)
         log.info(f"Ação: excluir_action (Categoria) para ID={id_categoria.value}")
         if not id_categoria.value:
             pn.state.notifications.warning('Selecione uma categoria para excluir.')
@@ -96,7 +93,6 @@ def create_categoria_view():
             con.rollback()
             pn.state.notifications.error('Erro ao excluir. Verifique o console.')
 
-    ### CORREÇÃO 2: Alterando a função para observar a 'selection' ###
     def selecionar_linha(event):
         if not event.new:  # Se a lista de seleção estiver vazia
             limpar_campos()

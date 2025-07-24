@@ -1,4 +1,3 @@
-
 import panel as pn
 import pandas as pd
 from sqlalchemy import text
@@ -9,6 +8,7 @@ from logger_config import log
 def create_aula_view():
     log.info("Inicializando a tela de gerenciamento de Aulas.")
 
+    # --- Funções para popular Selects ---
     def get_instrutores_options():
         try:
             query = "SELECT i.id_usuario, u.pnome || ' ' || u.snome AS nome_completo FROM instrutor i JOIN usuario u ON i.id_usuario = u.id_usuario ORDER BY nome_completo"
@@ -73,8 +73,6 @@ def create_aula_view():
         tabela_aulas.selection = []
 
     def inserir_action(event):
-        log.info(f"Ação: inserir_action (Aula) com título='{titulo.value}'")
-
         instrutor_id = int(select_instrutor.value[1]) if select_instrutor.value else None
         categoria_id = int(select_categoria.value[1]) if select_categoria.value else None
 
@@ -106,9 +104,11 @@ def create_aula_view():
             pn.state.notifications.warning('Selecione uma aula para atualizar.')
             return
 
-        # Convertendo explicitamente os IDs de numpy.int64 para int padrão
+        ### CORREÇÃO APLICADA AQUI ###
+        # Convertendo TODOS os valores numéricos para int padrão do Python
         instrutor_id = int(select_instrutor.value[1]) if select_instrutor.value else None
         categoria_id = int(select_categoria.value[1]) if select_categoria.value else None
+        capacidade = int(capacidade_maxima.value) if capacidade_maxima.value is not None else 0
 
         try:
             cursor = con.cursor()
@@ -116,8 +116,8 @@ def create_aula_view():
                 "UPDATE aula_oficina SET titulo=%s, id_instrutor=%s, id_categoria=%s, descricao_detalhada=%s, formato=%s, link_aula=%s, logradouro=%s, capacidade_maxima=%s, status_aula=%s, data_hora_inicio=%s, data_hora_fim=%s WHERE id_aula=%s",
                 (titulo.value, instrutor_id, categoria_id, descricao.value, formato.value,
                  link_aula.value if formato.value == 'Online' else None,
-                 logradouro.value if formato.value == 'Presencial' else None, capacidade_maxima.value,
-                 status_aula.value, data_hora_inicio.value, data_hora_fim.value, int(id_aula.value))
+                 logradouro.value if formato.value == 'Presencial' else None, capacidade, status_aula.value,
+                 data_hora_inicio.value, data_hora_fim.value, int(id_aula.value))
                 )
             con.commit()
             cursor.close()
@@ -163,7 +163,7 @@ def create_aula_view():
             descricao.value, formato.value = linha_data['descricao_detalhada'], linha_data['formato']
             link_aula.value = linha_data['link_aula'] if pd.notna(linha_data['link_aula']) else ''
             logradouro.value = linha_data['logradouro'] if pd.notna(linha_data['logradouro']) else ''
-            capacidade_maxima.value = linha_data['capacidade_maxima']
+            capacidade_maxima.value = int(linha_data['capacidade_maxima'])  # Garantir que seja int
             status_aula.value = linha_data['status_aula']
             data_hora_inicio.value, data_hora_fim.value = linha_data['data_hora_inicio'], linha_data['data_hora_fim']
 

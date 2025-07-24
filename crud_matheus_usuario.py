@@ -46,7 +46,6 @@ def create_usuario_view():
         tabela_usuarios.selection = []
 
     def inserir_action(event):
-        # ... (código interno sem alterações)
         log.info(f"Ação: inserir_action (Usuário) com email='{email.value}'")
         if not email.value or not pnome.value or not snome.value or not senha.value:
             pn.state.notifications.warning('Nome, sobrenome, e-mail e senha são obrigatórios.')
@@ -68,7 +67,6 @@ def create_usuario_view():
             pn.state.notifications.error('Erro ao inserir. Verifique o console.')
 
     def atualizar_action(event):
-        # ... (código interno sem alterações)
         log.info(f"Ação: atualizar_action (Usuário) para ID={id_usuario.value}")
         if not id_usuario.value:
             pn.state.notifications.warning('Selecione um usuário para atualizar.')
@@ -96,7 +94,6 @@ def create_usuario_view():
             pn.state.notifications.error('Erro ao atualizar. Verifique o console.')
 
     def excluir_action(event):
-        # ... (código interno sem alterações)
         log.info(f"Ação: excluir_action (Usuário) para ID={id_usuario.value}")
         if not id_usuario.value:
             pn.state.notifications.warning('Selecione um usuário para excluir.')
@@ -113,7 +110,6 @@ def create_usuario_view():
             con.rollback()
             pn.state.notifications.error('Erro ao excluir. Verifique o console.')
 
-    ### CORREÇÃO 2: Alterando a função para observar a 'selection' ###
     def selecionar_linha(event):
         if not event.new:
             limpar_campos()

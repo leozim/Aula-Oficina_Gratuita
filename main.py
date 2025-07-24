@@ -4,8 +4,8 @@ from logger_config import log
 
 import panel as pn
 from crud_vitor_categoria import create_categoria_view
-from crud_leonardo_usuario import create_usuario_view
-from crud_matheus_aula import create_aula_view
+from crud_matheus_usuario import create_usuario_view
+from crud_leonardo_aula import create_aula_view
 from crud_cinthia_inscricao import create_inscricao_view
 
 log.info("Aplicação iniciada. Configurando extensões do Panel...")
