@@ -78,7 +78,9 @@ CREATE TABLE CATEGORIA (
     descricao_categoria TEXT
 );
 
--- Tabela central com informações das aulas e oficinas
+-- ... (outras tabelas)
+
+-- Tabela central com informações das aulas e oficinas (ESTRUTURA ATUALIZADA)
 CREATE TABLE AULA_OFICINA (
     id_aula SERIAL PRIMARY KEY,
     id_instrutor INTEGER NOT NULL,
@@ -86,8 +88,12 @@ CREATE TABLE AULA_OFICINA (
     titulo VARCHAR(255) NOT NULL,
     descricao_detalhada TEXT,
     pre_requisitos TEXT,
-    data_hora_inicio TIMESTAMP WITH TIME ZONE,
-    data_hora_fim TIMESTAMP WITH TIME ZONE,
+    -- COLUNAS ANTIGAS REMOVIDAS
+    -- COLUNAS NOVAS ADICIONADAS
+    data_inicio DATE,
+    data_fim DATE,
+    hora_inicio TIME,
+    hora_fim TIME,
     formato VARCHAR(20) NOT NULL CHECK (formato IN ('Online', 'Presencial')),
     link_aula VARCHAR(255),
     logradouro VARCHAR(255),
@@ -216,9 +222,14 @@ CREATE TABLE MENSAGEM_PRIVADA (
     CONSTRAINT fk_msg_privada_destinatario FOREIGN KEY (id_destinatario) REFERENCES USUARIO(id_usuario) ON DELETE CASCADE
 );
 
--- Script para corrigir o tipo das colunas de data e hora
+/*
 ALTER TABLE AULA_OFICINA
-ALTER COLUMN data_hora_inicio TYPE TIMESTAMP WITHOUT TIME ZONE,
-ALTER COLUMN data_hora_fim TYPE TIMESTAMP WITHOUT TIME ZONE;
+ADD COLUMN data_inicio DATE,
+ADD COLUMN data_fim DATE,
+ADD COLUMN hora_inicio TIME,
+ADD COLUMN hora_fim TIME;
 
 COMMIT;
+
+ */
+

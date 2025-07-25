@@ -1,8 +1,10 @@
+# crud_matheus_aula.py
 import panel as pn
 import pandas as pd
 from sqlalchemy import text
 from database import engine, con
 from logger_config import log
+import datetime
 
 
 def create_aula_view():
@@ -39,8 +41,12 @@ def create_aula_view():
     capacidade_maxima = pn.widgets.IntInput(name='Capacidade Máxima', value=10, start=1)
     status_aula = pn.widgets.Select(name='Status',
                                     options=['Rascunho', 'Publicada', 'Em Andamento', 'Concluída', 'Cancelada'])
-    data_hora_inicio = pn.widgets.DatetimeInput(name='Início')
-    data_hora_fim = pn.widgets.DatetimeInput(name='Fim')
+
+    data_inicio = pn.widgets.DatePicker(name='Data de Início')
+    data_fim = pn.widgets.DatePicker(name='Data de Fim')
+    hora_inicio = pn.widgets.TimePicker(name='Hora de Início', format='%H:%M')
+    hora_fim = pn.widgets.TimePicker(name='Hora de Fim', format='%H:%M')
+
     filtro_titulo = pn.widgets.TextInput(name='Filtrar por Título', placeholder='Busque pelo título...')
 
     btn_inserir, btn_atualizar, btn_excluir, btn_consultar = [pn.widgets.Button(name=n, button_type=t) for n, t in
@@ -70,24 +76,51 @@ def create_aula_view():
     def limpar_campos(event=None):
         id_aula.value, titulo.value, descricao.value, link_aula.value, logradouro.value = '', '', '', '', ''
         capacidade_maxima.value = 10
+        data_inicio.value, data_fim.value, hora_inicio.value, hora_fim.value = None, None, None, None
         tabela_aulas.selection = []
 
     def inserir_action(event):
         instrutor_id = int(select_instrutor.value[1]) if select_instrutor.value else None
         categoria_id = int(select_categoria.value[1]) if select_categoria.value else None
 
-        if not all([titulo.value, instrutor_id, categoria_id]):
-            pn.state.notifications.warning('Título, Instrutor e Categoria são obrigatórios.')
+        if not all([titulo.value, instrutor_id, categoria_id, data_inicio.value, data_fim.value, hora_inicio.value,
+                    hora_fim.value]):
+            pn.state.notifications.warning('Todos os campos, incluindo datas e horas, são obrigatórios.')
+            return
+
+        try:
+            cursor = con.cursor()
+            query_conflito = """
+                SELECT titulo FROM aula_oficina
+                WHERE id_instrutor = %s
+                  AND data_inicio <= %s
+                  AND data_fim >= %s
+                  AND hora_inicio < %s
+                  AND hora_fim > %s
+            """
+            cursor.execute(query_conflito,
+                           (instrutor_id, data_fim.value, data_inicio.value, hora_fim.value, hora_inicio.value))
+            aula_conflitante = cursor.fetchone()
+
+            if aula_conflitante:
+                pn.state.notifications.error(
+                    f'Choque de horário! O instrutor já está alocado na aula "{aula_conflitante[0]}" neste período.')
+                cursor.close()
+                return
+            cursor.close()
+        except Exception:
+            log.exception("ERRO ao verificar choque de horários do instrutor!")
+            pn.state.notifications.error('Erro ao verificar horários. Verifique o console.')
             return
 
         try:
             cursor = con.cursor()
             cursor.execute(
-                "INSERT INTO aula_oficina (titulo, id_instrutor, id_categoria, descricao_detalhada, formato, link_aula, logradouro, capacidade_maxima, status_aula, data_hora_inicio, data_hora_fim) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                "INSERT INTO aula_oficina (titulo, id_instrutor, id_categoria, descricao_detalhada, formato, link_aula, logradouro, capacidade_maxima, status_aula, data_inicio, data_fim, hora_inicio, hora_fim) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (titulo.value, instrutor_id, categoria_id, descricao.value, formato.value,
                  link_aula.value if formato.value == 'Online' else None,
                  logradouro.value if formato.value == 'Presencial' else None, capacidade_maxima.value,
-                 status_aula.value, data_hora_inicio.value, data_hora_fim.value)
+                 status_aula.value, data_inicio.value, data_fim.value, hora_inicio.value, hora_fim.value)
                 )
             con.commit()
             cursor.close()
@@ -99,25 +132,54 @@ def create_aula_view():
             pn.state.notifications.error('Erro ao inserir. Verifique o console.')
 
     def atualizar_action(event):
-        log.info(f"Ação: atualizar_action (Aula) para ID={id_aula.value}")
         if not id_aula.value:
             pn.state.notifications.warning('Selecione uma aula para atualizar.')
             return
 
-        ### CORREÇÃO APLICADA AQUI ###
-        # Convertendo TODOS os valores numéricos para int padrão do Python
         instrutor_id = int(select_instrutor.value[1]) if select_instrutor.value else None
         categoria_id = int(select_categoria.value[1]) if select_categoria.value else None
         capacidade = int(capacidade_maxima.value) if capacidade_maxima.value is not None else 0
 
+        if not all([titulo.value, instrutor_id, categoria_id, data_inicio.value, data_fim.value, hora_inicio.value,
+                    hora_fim.value]):
+            pn.state.notifications.warning('Todos os campos, incluindo datas e horas, são obrigatórios.')
+            return
+
+        try:
+            cursor = con.cursor()
+            aula_atual_id = int(id_aula.value)
+            query_conflito = """
+                SELECT titulo FROM aula_oficina
+                WHERE id_instrutor = %s
+                  AND id_aula != %s
+                  AND data_inicio <= %s
+                  AND data_fim >= %s
+                  AND hora_inicio < %s
+                  AND hora_fim > %s
+            """
+            cursor.execute(query_conflito, (
+            instrutor_id, aula_atual_id, data_fim.value, data_inicio.value, hora_fim.value, hora_inicio.value))
+            aula_conflitante = cursor.fetchone()
+
+            if aula_conflitante:
+                pn.state.notifications.error(
+                    f'Choque de horário! O instrutor já está alocado na aula "{aula_conflitante[0]}" neste período.')
+                cursor.close()
+                return
+            cursor.close()
+        except Exception:
+            log.exception("ERRO ao verificar choque de horários na atualização!")
+            pn.state.notifications.error('Erro ao verificar horários. Verifique o console.')
+            return
+
         try:
             cursor = con.cursor()
             cursor.execute(
-                "UPDATE aula_oficina SET titulo=%s, id_instrutor=%s, id_categoria=%s, descricao_detalhada=%s, formato=%s, link_aula=%s, logradouro=%s, capacidade_maxima=%s, status_aula=%s, data_hora_inicio=%s, data_hora_fim=%s WHERE id_aula=%s",
+                "UPDATE aula_oficina SET titulo=%s, id_instrutor=%s, id_categoria=%s, descricao_detalhada=%s, formato=%s, link_aula=%s, logradouro=%s, capacidade_maxima=%s, status_aula=%s, data_inicio=%s, data_fim=%s, hora_inicio=%s, hora_fim=%s WHERE id_aula=%s",
                 (titulo.value, instrutor_id, categoria_id, descricao.value, formato.value,
                  link_aula.value if formato.value == 'Online' else None,
                  logradouro.value if formato.value == 'Presencial' else None, capacidade, status_aula.value,
-                 data_hora_inicio.value, data_hora_fim.value, int(id_aula.value))
+                 data_inicio.value, data_fim.value, hora_inicio.value, hora_fim.value, int(id_aula.value))
                 )
             con.commit()
             cursor.close()
@@ -163,9 +225,15 @@ def create_aula_view():
             descricao.value, formato.value = linha_data['descricao_detalhada'], linha_data['formato']
             link_aula.value = linha_data['link_aula'] if pd.notna(linha_data['link_aula']) else ''
             logradouro.value = linha_data['logradouro'] if pd.notna(linha_data['logradouro']) else ''
-            capacidade_maxima.value = int(linha_data['capacidade_maxima'])  # Garantir que seja int
+            capacidade_maxima.value = int(linha_data['capacidade_maxima'])
             status_aula.value = linha_data['status_aula']
-            data_hora_inicio.value, data_hora_fim.value = linha_data['data_hora_inicio'], linha_data['data_hora_fim']
+
+            data_inicio.value = linha_data['data_inicio']
+            data_fim.value = linha_data['data_fim']
+
+            ### CORREÇÃO: Atribuindo o valor diretamente, sem conversões complexas ###
+            hora_inicio.value = linha_data['hora_inicio']
+            hora_fim.value = linha_data['hora_fim']
 
             select_instrutor.value = next(
                 (item for item in select_instrutor.options if item[1] == linha_data['id_instrutor']), None)
@@ -182,8 +250,9 @@ def create_aula_view():
 
     carregar_dados()
 
+    # --- Layout Final ---
     form_col1 = pn.Column(id_aula, titulo, select_instrutor, select_categoria, status_aula, capacidade_maxima)
-    form_col2 = pn.Column(data_hora_inicio, data_hora_fim, formato, link_aula, logradouro)
+    form_col2 = pn.Column(pn.Row(data_inicio, data_fim), pn.Row(hora_inicio, hora_fim), formato, link_aula, logradouro)
     form_col3 = pn.Column(descricao)
     layout = pn.Column(
         pn.Row(filtro_titulo, btn_consultar, align='end'),

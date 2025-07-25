@@ -81,17 +81,19 @@ INSERT INTO CATEGORIA (nome_categoria, descricao_categoria) VALUES
 ('Fotografia', 'Cursos sobre técnicas fotográficas, edição de imagem e equipamentos.'),
 ('Dança', 'Aulas de diversos estilos de dança, para iniciantes e avançados.');
 
-INSERT INTO AULA_OFICINA (id_instrutor, id_categoria, titulo, descricao_detalhada, data_hora_inicio, data_hora_fim, formato, link_aula, logradouro, numero, bairro, cidade, estado, cep, capacidade_maxima, status_aula) VALUES
-(2, 1, 'Introdução ao Python', 'Aprenda os conceitos básicos da linguagem Python.', '2025-08-01 19:00:00', '2025-08-01 21:00:00', 'Online', 'http://meet.google.com/pypy', NULL, NULL, NULL, NULL, NULL, NULL, 50, 'Publicada'),
-(3, 2, 'Aquarela para Iniciantes', 'Descubra o mundo da pintura em aquarela.', '2025-08-05 14:00:00', '2025-08-05 17:00:00', 'Presencial', NULL, 'Rua das Artes', '123', 'Centro', 'Fortaleza', 'CE', '60000-000', 15, 'Publicada'),
-(5, 3, 'Culinária Cearense: Baião de Dois', 'Aprenda a fazer um autêntico Baião de Dois.', '2025-07-25 18:00:00', '2025-07-25 20:00:00', 'Presencial', NULL, 'Av. Beira Mar', '456', 'Meireles', 'Fortaleza', 'CE', '60165-121', 20, 'Em Andamento'),
-(6, 4, 'Violão Básico', 'Primeiros acordes e ritmos no violão.', '2025-08-10 10:00:00', '2025-08-10 12:00:00', 'Online', 'http://zoom.us/violao', NULL, NULL, NULL, NULL, NULL, NULL, 30, 'Publicada'),
-(7, 5, 'Meditação Guiada para Aliviar o Estresse', 'Uma sessão para acalmar a mente.', '2025-07-30 07:00:00', '2025-07-30 08:00:00', 'Online', 'http://meet.google.com/medi', NULL, NULL, NULL, NULL, NULL, NULL, 100, 'Publicada'),
-(2, 1, 'Desenvolvimento Web com Flask', 'Crie sua primeira aplicação web com Python e Flask.', '2025-09-01 19:00:00', '2025-09-01 21:00:00', 'Online', 'http://meet.google.com/flask', NULL, NULL, NULL, NULL, NULL, NULL, 40, 'Publicada'),
-(3, 8, 'Oficina de Macramê', 'Aprenda a arte dos nós para criar peças decorativas.', '2025-08-20 15:00:00', '2025-08-20 18:00:00', 'Presencial', NULL, 'Rua dos Artesãos', '789', 'Aldeota', 'Fortaleza', 'CE', '60150-160', 12, 'Publicada'),
-(5, 3, 'Moqueca Baiana', 'Uma viagem de sabores pela culinária da Bahia.', '2025-07-15 19:00:00', '2025-07-15 21:00:00', 'Presencial', NULL, 'Av. Beira Mar', '456', 'Meireles', 'Fortaleza', 'CE', '60165-121', 20, 'Concluída'),
-(6, 4, 'Teoria Musical para Leigos', 'Entenda os fundamentos da música.', '2025-07-10 18:00:00', '2025-07-10 19:00:00', 'Online', 'http://zoom.us/teoria', NULL, NULL, NULL, NULL, NULL, NULL, 50, 'Concluída'),
-(7, 5, 'Yoga para Iniciantes', 'Introdução às posturas e respiração do Yoga.', '2025-07-01 09:00:00', '2025-07-01 10:30:00', 'Presencial', NULL, 'Parque do Cocó', 's/n', 'Cocó', 'Fortaleza', 'CE', '60175-055', 25, 'Cancelada');
+INSERT INTO AULA_OFICINA
+    (id_instrutor, id_categoria, titulo, descricao_detalhada, data_inicio, data_fim, hora_inicio, hora_fim, formato, link_aula, logradouro, numero, bairro, cidade, estado, cep, capacidade_maxima, status_aula)
+VALUES
+(2, 1, 'Introdução ao Python', 'Aprenda os conceitos básicos da linguagem Python.', '2025-08-01', '2025-08-01', '19:00:00', '21:00:00', 'Online', 'http://meet.google.com/pypy', NULL, NULL, NULL, NULL, NULL, NULL, 50, 'Publicada'),
+(3, 2, 'Aquarela para Iniciantes', 'Descubra o mundo da pintura em aquarela.', '2025-08-05', '2025-08-05', '14:00:00', '17:00:00', 'Presencial', NULL, 'Rua das Artes', '123', 'Centro', 'Fortaleza', 'CE', '60000-000', 15, 'Publicada'),
+(5, 3, 'Culinária Cearense: Baião de Dois', 'Aprenda a fazer um autêntico Baião de Dois.', '2025-07-25', '2025-07-25', '18:00:00', '20:00:00', 'Presencial', NULL, 'Av. Beira Mar', '456', 'Meireles', 'Fortaleza', 'CE', '60165-121', 20, 'Em Andamento'),
+(6, 4, 'Violão Básico', 'Primeiros acordes e ritmos no violão.', '2025-08-10', '2025-08-10', '10:00:00', '12:00:00', 'Online', 'http://zoom.us/violao', NULL, NULL, NULL, NULL, NULL, NULL, 30, 'Publicada'),
+(7, 5, 'Meditação Guiada para Aliviar o Estresse', 'Uma sessão para acalmar a mente.', '2025-07-30', '2025-07-30', '07:00:00', '08:00:00', 'Online', 'http://meet.google.com/medi', NULL, NULL, NULL, NULL, NULL, NULL, 100, 'Publicada'),
+(2, 1, 'Desenvolvimento Web com Flask', 'Crie sua primeira aplicação web com Python e Flask.', '2025-09-01', '2025-09-01', '19:00:00', '21:00:00', 'Online', 'http://meet.google.com/flask', NULL, NULL, NULL, NULL, NULL, NULL, 40, 'Publicada'),
+(3, 8, 'Oficina de Macramê', 'Aprenda a arte dos nós para criar peças decorativas.', '2025-08-20', '2025-08-20', '15:00:00', '18:00:00', 'Presencial', NULL, 'Rua dos Artesãos', '789', 'Aldeota', 'Fortaleza', 'CE', '60150-160', 12, 'Publicada'),
+(5, 3, 'Moqueca Baiana', 'Uma viagem de sabores pela culinária da Bahia.', '2025-07-15', '2025-07-15', '19:00:00', '21:00:00', 'Presencial', NULL, 'Av. Beira Mar', '456', 'Meireles', 'Fortaleza', 'CE', '60165-121', 20, 'Concluída'),
+(6, 4, 'Teoria Musical para Leigos', 'Entenda os fundamentos da música.', '2025-07-10', '2025-07-10', '18:00:00', '19:00:00', 'Online', 'http://zoom.us/teoria', NULL, NULL, NULL, NULL, NULL, NULL, 50, 'Concluída'),
+(7, 5, 'Yoga para Iniciantes', 'Introdução às posturas e respiração do Yoga.', '2025-07-01', '2025-07-01', '09:00:00', '10:30:00', 'Presencial', NULL, 'Parque do Cocó', 's/n', 'Cocó', 'Fortaleza', 'CE', '60175-055', 25, 'Cancelada');
 
 INSERT INTO INSCRICAO (id_aluno, id_aula, status_inscricao) VALUES
 (8, 1, 'Confirmada'), (10, 1, 'Confirmada'), (9, 2, 'Confirmada'),

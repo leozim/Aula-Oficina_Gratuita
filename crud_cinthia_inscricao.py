@@ -1,4 +1,4 @@
-
+# crud_cinthia_inscricao.py
 import panel as pn
 import pandas as pd
 from sqlalchemy import text
@@ -10,6 +10,7 @@ import datetime
 def create_inscricao_view():
     log.info("Inicializando a tela de gerenciamento de Inscrições.")
 
+    # --- Funções para popular Selects ---
     def get_alunos_options():
         try:
             query = "SELECT a.id_usuario, u.pnome || ' ' || u.snome AS nome_completo FROM aluno a JOIN usuario u ON a.id_usuario = u.id_usuario ORDER BY nome_completo"
@@ -30,6 +31,7 @@ def create_inscricao_view():
             log.exception("ERRO ao carregar opções de aulas!")
             return []
 
+    # --- Widgets e Botões ---
     select_aluno = pn.widgets.Select(name='Aluno', options=get_alunos_options())
     select_aula = pn.widgets.Select(name='Aula', options=get_aulas_options())
     status_inscricao = pn.widgets.Select(name='Status', options=['Confirmada', 'Lista de Espera', 'Cancelada'])
@@ -46,6 +48,7 @@ def create_inscricao_view():
     tabela_inscricoes = pn.widgets.Tabulator(None, layout='fit_data_table', disabled=True, page_size=10,
                                              selectable=True)
 
+    # --- Funções de Ação ---
     def carregar_dados(event=None):
         params = {}
         base_query = "SELECT i.id_aluno, u.pnome || ' ' || u.snome AS aluno, i.id_aula, a.titulo AS aula, i.data_inscricao, i.status_inscricao FROM inscricao i JOIN aluno al ON i.id_aluno = al.id_usuario JOIN usuario u ON al.id_usuario = u.id_usuario JOIN aula_oficina a ON i.id_aula = a.id_aula"
@@ -72,13 +75,57 @@ def create_inscricao_view():
         tabela_inscricoes.selection = []
 
     def inserir_action(event):
-        ### CORREÇÃO: Convertendo IDs de numpy.int64 para int padrão ###
         aluno_id = int(select_aluno.value[1]) if select_aluno.value else None
         aula_id = int(select_aula.value[1]) if select_aula.value else None
+        log.info(f"Ação: inserir_action (Inscrição) para aluno_id={aluno_id}, aula_id={aula_id}")
 
         if not aluno_id or not aula_id:
             pn.state.notifications.warning('Aluno e Aula são obrigatórios.')
             return
+
+        ### VALIDAÇÃO DE CHOQUE DE HORÁRIOS (LÓGICA ATUALIZADA) ###
+        try:
+            cursor = con.cursor()
+            # 1. Pega o horário da nova aula que o aluno quer se inscrever.
+            cursor.execute("SELECT data_inicio, data_fim, hora_inicio, hora_fim FROM aula_oficina WHERE id_aula = %s",
+                           (aula_id,))
+            nova_aula_horario = cursor.fetchone()
+            if not nova_aula_horario or not all(nova_aula_horario):
+                log.warning(
+                    f"A aula ID={aula_id} não tem horário completo definido. Inscrição permitida sem verificação.")
+            else:
+                nova_data_inicio, nova_data_fim, nova_hora_inicio, nova_hora_fim = nova_aula_horario
+
+                # 2. Verifica se existe alguma outra aula CONFIRMADA para este aluno que conflite com o novo horário.
+                query_conflito = """
+                    SELECT a.titulo
+                    FROM inscricao i
+                    JOIN aula_oficina a ON i.id_aula = a.id_aula
+                    WHERE i.id_aluno = %s
+                      AND i.status_inscricao = 'Confirmada'
+                      AND a.data_inicio <= %s
+                      AND a.data_fim >= %s
+                      AND a.hora_inicio < %s
+                      AND a.hora_fim > %s
+                """
+                cursor.execute(query_conflito,
+                               (aluno_id, nova_data_fim, nova_data_inicio, nova_hora_fim, nova_hora_inicio))
+                aula_conflitante = cursor.fetchone()
+
+                # 3. Se encontrou alguma aula conflitante, avisa o usuário e interrompe.
+                if aula_conflitante:
+                    pn.state.notifications.error(
+                        f'Choque de horário! O aluno já está inscrito na aula "{aula_conflitante[0]}" neste período.')
+                    cursor.close()
+                    return
+
+            cursor.close()
+        except Exception:
+            log.exception("ERRO ao verificar choque de horários!")
+            pn.state.notifications.error('Erro ao verificar horários. Verifique o console.')
+            return
+
+        # Se passou por todas as validações, prossegue com a inserção.
         try:
             cursor = con.cursor()
             cursor.execute(
