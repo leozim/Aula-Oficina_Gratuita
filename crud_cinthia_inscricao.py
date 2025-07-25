@@ -1,4 +1,4 @@
-# crud_cinthia_inscricao.py
+
 import panel as pn
 import pandas as pd
 from sqlalchemy import text

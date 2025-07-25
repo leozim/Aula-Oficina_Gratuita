@@ -1,4 +1,4 @@
-# crud_matheus_aula.py
+
 import panel as pn
 import pandas as pd
 from sqlalchemy import text
@@ -231,7 +231,7 @@ def create_aula_view():
             data_inicio.value = linha_data['data_inicio']
             data_fim.value = linha_data['data_fim']
 
-            ### CORREÇÃO: Atribuindo o valor diretamente, sem conversões complexas ###
+
             hora_inicio.value = linha_data['hora_inicio']
             hora_fim.value = linha_data['hora_fim']
 

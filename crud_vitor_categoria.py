@@ -1,4 +1,4 @@
-# crud_vitor_categoria.py
+
 import panel as pn
 import pandas as pd
 from sqlalchemy import text
@@ -47,18 +47,18 @@ def create_categoria_view():
             pn.state.notifications.warning('O nome da categoria é obrigatório.')
             return
 
-        ### VALIDAÇÃO DE DUPLICIDADE (NOVO) ###
+        ### VALIDAÇÃO DE DUPLICIDADE
         try:
-            # Cria um cursor para fazer uma verificação no banco.
+
             cursor = con.cursor()
             # Executa uma consulta que conta quantas categorias existem com o mesmo nome (ignorando maiúsculas/minúsculas).
             cursor.execute("SELECT COUNT(*) FROM categoria WHERE LOWER(nome_categoria) = LOWER(%s)",
                            (nome_categoria.value,))
-            # Pega o resultado da contagem.
+
             (count,) = cursor.fetchone()
             cursor.close()
 
-            # Se a contagem for maior que 0, significa que a categoria já existe.
+
             if count > 0:
                 log.warning(f"Tentativa de inserir categoria duplicada: '{nome_categoria.value}'")
                 pn.state.notifications.error('Já existe uma categoria com este nome.')
@@ -69,7 +69,7 @@ def create_categoria_view():
             pn.state.notifications.error('Erro ao verificar categoria. Verifique o console.')
             return
 
-        # Se passou pela validação, prossegue com a inserção.
+
         try:
             cursor = con.cursor()
             cursor.execute("INSERT INTO categoria (nome_categoria, descricao_categoria) VALUES (%s, %s)",
